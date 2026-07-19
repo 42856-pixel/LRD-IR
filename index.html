@@ -1,7 +1,83 @@
-const URL = "https://teachablemachine.withgoogle.com/models/WBQm5pH1S/";
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teachable Machine 3-Sec Update</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 { margin-top: 0; color: #2c3e50; }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 1.5rem;
+        }
+        button:hover { background-color: #2980b9; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        #webcam-container {
+            margin: 0 auto 1.5rem auto;
+            border-radius: 12px;
+            overflow: hidden;
+            width: 200px;
+            height: 200px;
+            background-color: #eee;
+        }
+        #webcam-container canvas { display: block; }
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            background: #f8f9fa;
+            padding: 10px 14px;
+            margin: 6px 0;
+            border-radius: 8px;
+            font-weight: 500;
+            border-left: 4px solid #3498db;
+        }
+        .probability { color: #27ae60; font-family: monospace; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Teachable Machine AI</h2>
+    <button type="button" id="start-btn" onclick="init()">เปิดกล้อง (อัปเดตทุก 3 วิ)</button>
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+<script type="text/javascript">
+    const URL = "https://teachablemachine.withgoogle.com/models/WBQm5pH1S/";
     let model, webcam, labelContainer, maxPredictions;
     let isRunning = false;
-    let loopTimeout; // เพิ่มตัวแปรสำหรับเก็บค่าการตั้งเวลา
 
     async function init() {
         if (isRunning) return;
@@ -37,13 +113,11 @@ const URL = "https://teachablemachine.withgoogle.com/models/WBQm5pH1S/";
                 labelContainer.appendChild(row);
             }
 
-            startBtn.innerText = "กำลังทำงาน (ทุกๆ 3 วิ)...";
-            
-            // เรียกฟังก์ชันลูปครั้งแรก
+            startBtn.innerText = "กำลังทำงาน...";
             loop();
 
         } catch (error) {
-            console.error("เกิดข้อผิดพลาด:", error);
+            console.error(error);
             alert("ไม่สามารถเปิดกล้องได้");
             startBtn.disabled = false;
             startBtn.innerText = "ลองใหม่อีกครั้ง";
@@ -51,19 +125,15 @@ const URL = "https://teachablemachine.withgoogle.com/models/WBQm5pH1S/";
         }
     }
 
-    // เปลี่ยนมาใช้ async loop ร่วมกับ setTimeout เพื่อหน่วงเวลา 3 วินาที
     async function loop() {
         if (!isRunning) return;
-        
         try {
-            webcam.update(); // อัปเดตภาพจากกล้อง ณ วินาทีนั้น
-            await predict(); // ทำนายผลทันที
+            webcam.update();
+            await predict();
         } catch (err) {
-            console.error("ลูปทำงานผิดพลาด:", err);
+            console.error(err);
         }
-
-        // เมื่อทำนายเสร็จแล้ว ให้รออีก 3000 มิลลิวินาที (3 วินาที) ก่อนจะเรียกตัวเองใหม่อีกครั้ง
-        loopTimeout = setTimeout(loop, 3000);
+        setTimeout(loop, 3000); // อัปเดตทุกๆ 3 วินาที
     }
 
     async function predict() {
@@ -77,3 +147,7 @@ const URL = "https://teachablemachine.withgoogle.com/models/WBQm5pH1S/";
             item.querySelector(".probability").textContent = probabilityText;
         }
     }
+</script>
+
+</body>
+</html>
